@@ -3,11 +3,11 @@ import pandas as pd
 from pymongo import MongoClient
 
 # Connect to MongoDB running on the host machine
-client = MongoClient("mongodb://host.docker.internal:27017/")
+client = MongoClient("mongodb://192.168.1.8:27017/")
 db = client['hvac']
 
 # Directory containing the CSV files
-csv_directory = '/workspaces/hvac/data'
+csv_directory = '/home/satya/hvac_mobile/.github/data'
 
 # Iterate over all CSV files in the directory
 for filename in os.listdir(csv_directory):

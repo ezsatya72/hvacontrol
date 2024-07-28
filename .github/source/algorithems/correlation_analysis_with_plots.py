@@ -1,15 +1,16 @@
 import pandas as pd
 from pymongo import MongoClient
 import matplotlib.pyplot as plt
+import seaborn as sns
 
-# Connect to MongoDB running on the host machine
-client = MongoClient("mongodb://host.docker.internal:27017/")
+# Replace 'YOUR_WINDOWS_IP' with the actual IP address of your Windows host
+client = MongoClient("mongodb://192.168.1.8:27017/")
 db = client['hvac']
 
 # Retrieve data from MongoDB collections
-boilers_data = pd.DataFrame(list(db['boilers_data_sample'].find()))
-chillers_data = pd.DataFrame(list(db['chillers_data'].find()))
-ahus_data = pd.DataFrame(list(db['ahus_data_sample'].find()))
+boilers_data = pd.DataFrame(list(db['boilers_data'].find()))
+chillers_data = pd.DataFrame(list(db['chillers'].find()))
+ahus_data = pd.DataFrame(list(db['ahus_data'].find()))
 
 # Remove ObjectId columns and any other non-numeric columns
 boilers_data = boilers_data.select_dtypes(include=[float, int])
@@ -39,6 +40,15 @@ plt.ylabel('Values')
 plt.legend()
 plt.show()
 
+# Calculate correlation matrix
+correlation_matrix = combined_data.corr()
+
+# Plot heatmap
+plt.figure(figsize=(10, 8))
+sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap='coolwarm', cbar=True, square=True)
+plt.title('Correlation Heatmap')
+plt.show()
+
 # Generate recommendations
 def generate_recommendations(correlation_matrix):
     recommendations = []
@@ -51,9 +61,6 @@ def generate_recommendations(correlation_matrix):
             else:
                 recommendations.append(f"Increase in {column} is negatively correlated with {feature}. Consider adjusting {feature} when {column} decreases.")
     return recommendations
-
-# Calculate correlation matrix
-correlation_matrix = combined_data.corr()
 
 recommendations = generate_recommendations(correlation_matrix)
 for recommendation in recommendations:
